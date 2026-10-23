@@ -1,0 +1,19 @@
+project:
+  name: ConservationLens Living Plans Prototype
+  version: 0.1
+
+geography:
+  name: El Rito
+  state: New Mexico
+
+baseline:
+  year: 2020
+
+current:
+  year: 2026
+
+questions:
+  - What is exposed?
+  - What work has been completed?
+  - What important need remains?
+  - What has changed since the planning baseline?
