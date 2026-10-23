@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ConservationLens GIS data
+data/raw/*
+data/processed/*
+
+# Keep placeholder files
+!data/raw/.gitkeep
+!data/processed/.gitkeep
