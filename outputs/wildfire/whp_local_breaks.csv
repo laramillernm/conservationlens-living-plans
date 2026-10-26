@@ -1,0 +1,6 @@
+class_value,class_name,percentile_range,lower_whp_value,upper_whp_value
+0,Zero / No WHP,Not included,0,0
+1,Lower,0-50,>0,301.0
+2,Moderate,50-75,301.0,2981.0
+3,High,75-90,2981.0,4482.0
+4,Highest,90-100,4482.0,

@@ -1,0 +1,3 @@
+indicator,minimum,maximum,mean,standard_deviation
+burn_probability,0.0,0.0088742105290294,0.0042630985962464,0.002626882060081
+wildfire_hazard_potential,0.0,6560.0,1405.5445865851,1809.4154675164
