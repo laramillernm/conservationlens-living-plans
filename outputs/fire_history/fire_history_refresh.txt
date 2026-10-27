@@ -1,0 +1,7 @@
+source=WFIGS Interagency Fire Perimeters
+baseline_year=2020
+date_field=attr_FireDiscoveryDateTime
+refresh_time=2026-10-27T10:48:18.007766
+candidate_records=5
+post_baseline_records=5
+affected_acres=3056.13
