@@ -1,0 +1,17 @@
+metric,value
+dataset,MTBS Burned Area Boundaries
+source_file,C:\Users\Lara\ConservationInsights\conservationlens-living-plans\data\raw\fire_history\mtbs\extracted\mtbs_perims_DD.shp
+watershed_acres,86486.33
+unique_mtbs_fires_intersecting_el_rito,4
+first_mapped_fire_year_present,2005
+last_mapped_fire_year_present,2022
+historical_comparison_period,2005-2014
+recent_comparison_period,2015-2024
+all_years_unique_burned_acres,8444.37
+all_years_unique_percent_watershed,9.76
+all_years_repeat_burn_acres,13.74
+all_years_maximum_burn_count,2
+method_id,mtbs_fire_history_v3
+script_version,3.0
+interpretation_rule,Rule-based; no free-form interpretation used.
+limitation,MTBS focuses on significant mapped fires. Small fires not mapped by MTBS are not represented.

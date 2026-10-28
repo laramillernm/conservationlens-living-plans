@@ -1,0 +1,14 @@
+metric,value
+analysis_area,El Rito fire landscape
+context_buffer_km,20
+dataset,Karen Short FPA FOD
+source_layer,Fire_FPA_FOD_7th_Fires
+source_refresh_date,2026-10-27T16:29:15
+source_records,1553
+source_period,1992-2024
+historical_comparison_period,2005-2014
+recent_comparison_period,2015-2024
+method_id,fire_regime_occurrence_v1
+script_version,1.0
+interpretation_rule,Rule-based; no free-form interpretation used.
+limitation,FPA FOD represents reported fire-occurrence points. Counts and trends may be influenced by reporting practices.

@@ -1,0 +1,3 @@
+period,start_year,end_year,reported_fires,average_reported_fires_per_year,fires_lt_10_acres,fires_10_99_acres,fires_100_999_acres,fires_ge_1000_acres,median_fire_size_acres,p90_fire_size_acres,max_fire_size_acres
+2005-2014,2005,2014,509,50.9,488,14,5,2,0.25,3.0,27100.0
+2015-2024,2015,2024,336,33.6,300,24,4,8,0.25,10.0,7495.0

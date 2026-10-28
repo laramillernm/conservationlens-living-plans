@@ -1,0 +1,13 @@
+month,month_name,reported_fires,percent_of_reported_fires
+1,January,14,0.9
+2,February,45,2.9
+3,March,140,9.0
+4,April,146,9.4
+5,May,165,10.6
+6,June,329,21.2
+7,July,403,25.9
+8,August,174,11.2
+9,September,57,3.7
+10,October,35,2.3
+11,November,34,2.2
+12,December,11,0.7

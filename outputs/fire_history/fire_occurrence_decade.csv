@@ -1,0 +1,5 @@
+decade,years_in_dataset,reported_fires,average_reported_fires_per_year,fires_lt_10_acres,fires_10_99_acres,fires_100_999_acres,fires_ge_1000_acres,median_fire_size_acres,p90_fire_size_acres,max_fire_size_acres
+1990s,8,399,49.88,343,46,9,1,1.0,15.0,5185.0
+2000s,10,574,57.4,546,23,3,2,0.25,3.87,4257.0
+2010s,10,412,41.2,378,22,6,6,0.25,5.92,27100.0
+2020s,5,168,33.6,154,10,1,3,0.25,7.72,4896.0

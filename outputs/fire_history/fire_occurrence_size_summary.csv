@@ -1,0 +1,6 @@
+size_band,reported_fires,percent_of_reported_fires
+<10 acres,1421,91.5
+10-99 acres,101,6.5
+100-999 acres,19,1.2
+">=1,000 acres",12,0.8
+Unknown,0,0.0

@@ -1,0 +1,5 @@
+event_id,incident_name,incident_type,ignition_date,fire_year,mtbs_total_fire_acres,acres_inside_el_rito,percent_of_watershed,map_program,assessment_type
+NM3635610626420050917,PINE CANYON,Wildfire,2005-09-17,2005,4090.0,3206.53,3.71,MTBS,Extended
+NM3644910620720190713,FRANCISQUITO,Wildfire,2019-07-13,2019,1939.0,13.74,0.02,MTBS,Initial
+NM3650210626920190607,GURULE,Wildfire,2019-06-07,2019,2279.0,2278.52,2.63,MTBS,Initial
+NM3645010622520220610,MIDNIGHT,Wildfire,2022-06-10,2022,5288.0,2959.32,3.42,MTBS,Extended

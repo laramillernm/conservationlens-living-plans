@@ -1,0 +1,7 @@
+metric_id,metric_name,dataset,source_layer,historical_period,recent_period,historical_value,recent_value,absolute_change,percent_change,unit,method_id,script_version,refresh_date
+reported_fire_frequency,Reported Fire Frequency,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,50.9,33.6,-17.3,-34.0,fires/year,fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15
+small_fire_occurrence,Small Fire Occurrence,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,488,300,-188,-38.5,fires <10 acres / 10-year period,fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15
+medium_fire_occurrence,10-99 Acre Fire Occurrence,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,14,24,10,71.4,fires / 10-year period,fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15
+large_fire_occurrence,Large Fire Occurrence,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,2,8,6,300.0,"fires >=1,000 acres / 10-year period",fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15
+upper_tail_fire_size,Upper-Tail Fire Size,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,3.0,10.0,7.0,233.3,90th percentile acres,fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15
+median_fire_size,Median Fire Size,Karen Short FPA FOD,Fire_FPA_FOD_7th_Fires,2005-2014,2015-2024,0.25,0.25,0.0,0.0,acres,fire_regime_occurrence_v1,1.0,2026-10-27T16:29:15

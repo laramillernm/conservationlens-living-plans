@@ -1,0 +1,7 @@
+metric_id,metric_name,dataset,historical_period,recent_period,historical_value,recent_value,absolute_change,percent_change,unit,method_id,script_version
+mapped_large_fire_count,Mapped Large Fire Count,MTBS Burned Area Boundaries,2005-2014,2015-2024,1,3,2,200.0,fires / 10-year period,mtbs_fire_history_v3,3.0
+cumulative_mapped_fire_area,Cumulative Mapped Fire Area,MTBS Burned Area Boundaries,2005-2014,2015-2024,3206.53,5251.58,2045.05,63.8,acres,mtbs_fire_history_v3,3.0
+unique_burned_area,Unique Burned Area,MTBS Burned Area Boundaries,2005-2014,2015-2024,3206.53,5237.84,2031.31,63.3,acres,mtbs_fire_history_v3,3.0
+unique_watershed_area_burned,Unique Watershed Area Burned,MTBS Burned Area Boundaries,2005-2014,2015-2024,3.71,6.06,2.35,63.3,percent of watershed,mtbs_fire_history_v3,3.0
+repeat_burn_area,Repeat-Burn Area,MTBS Burned Area Boundaries,2005-2014,2015-2024,0.0,13.74,13.74,,acres burned 2+ times,mtbs_fire_history_v3,3.0
+maximum_burn_count,Maximum Mapped Burn Count,MTBS Burned Area Boundaries,2005-2014,2015-2024,1,2,1,100.0,mapped fires,mtbs_fire_history_v3,3.0
