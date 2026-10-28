@@ -1,0 +1,7 @@
+metric,value,unit
+cumulative_mapped_fire_acres,8458.11,acres
+unique_acres_burned_at_least_once,8444.37,acres
+unique_percent_watershed_burned,9.76,percent
+repeat_burn_acres_2plus,13.74,acres
+repeat_burn_percent_watershed,0.02,percent
+maximum_mapped_burn_count,2,mapped fires

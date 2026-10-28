@@ -1,19 +1,64 @@
 project:
-  name: ConservationLens Living Plans Prototype
-  version: 0.1
+  name: ConservationLens Living Plans
+  version: "0.1"
 
-geography:
-  name: El Rito
-  state: New Mexico
+planning_area:
+  name: El Rito Watershed
+  type: watershed
+  source: data/boundaries/el_rito_boundary.geojson
 
-baseline:
-  year: 2020
-
-current:
-  year: 2026
+planning_period:
+  baseline_year: 2020
+  current_year: 2026
 
 questions:
   - What is exposed?
   - What work has been completed?
   - What important need remains?
   - What has changed since the planning baseline?
+
+analysis_areas:
+
+  fire_context:
+    method: buffer
+    distance_km: 20
+    purpose: >
+      Provides broader landscape context for fire occurrence,
+      fire-size distribution, and fire-regime analysis.
+
+  post_fire_hydrologic_context:
+    method: upstream_contributing_area
+    derived_from: DEM
+    target_mode: planning_area
+
+    include:
+      - upstream_drainage_to_planning_area
+      - streams_entering_planning_area
+      - key_watershed_assets
+
+    purpose: >
+      Includes upstream areas capable of routing post-fire runoff,
+      sediment, erosion, or debris-flow impacts into the planning
+      area or identified watershed assets.
+
+  treatment_context:
+    method: planning_plus_contributing_area
+
+    include:
+      - planning_area
+      - post_fire_hydrologic_context
+
+    purpose: >
+      Defines the landscape where forest treatment could reduce
+      wildfire effects or downstream watershed consequences.
+
+fire_regime:
+  historical_period:
+    start: 2005
+    end: 2014
+
+  recent_period:
+    start: 2015
+    end: 2024
+
+  occurrence_context_buffer_km: 20

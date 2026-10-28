@@ -2,33 +2,25 @@
 ConservationLens Living Plans
 Standardize fire perimeter data into the canonical ConservationLens schema.
 
-Version 1.0
+Version 1.2
 
-Current source adapter
-----------------------
-MTBS Burned Area Boundaries
+Current source adapters
+-----------------------
+1. MTBS Burned Area Boundaries
+2. Optional local fire perimeter source
 
-Purpose
--------
-Convert source-specific fire perimeter data into a standard schema so
-downstream analysis does not depend on MTBS-specific field names.
+The local adapter remains inactive when no local dataset is present.
 
-Future sources can be added as additional adapters without changing
-the canonical output schema.
-
-Current canonical output
-------------------------
-data/processed/fire_history/fire_perimeters_current.gpkg
-
-Important
----------
-This script does not yet merge multiple sources or resolve conflicts.
-Version 1.0 establishes the canonical schema using MTBS as the first
-source adapter.
+Canonical output
+----------------
+data/processed/fire_history/
+    fire_perimeters_current.gpkg/
+        fire_perimeters_current
 """
 
 from pathlib import Path
 from datetime import datetime
+import csv
 import uuid
 
 import arcpy
@@ -52,6 +44,20 @@ MTBS_INPUT = (
     / "mtbs_perims_DD.shp"
 )
 
+LOCAL_DIR = (
+    PROJECT_ROOT
+    / "data"
+    / "raw"
+    / "fire_history"
+    / "local"
+)
+
+LOCAL_MAPPING_FILE = (
+    PROJECT_ROOT
+    / "config"
+    / "local_fire_perimeter_mapping.csv"
+)
+
 PROCESSED_DIR = (
     PROJECT_ROOT
     / "data"
@@ -64,109 +70,60 @@ PROCESSED_DIR.mkdir(
     exist_ok=True
 )
 
+LOCAL_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
 OUTPUT_GPKG = (
     PROCESSED_DIR
     / "fire_perimeters_current.gpkg"
 )
 
+OUTPUT_LAYER_NAME = "fire_perimeters_current"
 
-# ============================================================
-# SOURCE SETTINGS
-# ============================================================
-
-SOURCE_ID = "mtbs"
-
-SOURCE_NAME = "MTBS Burned Area Boundaries"
-
-SOURCE_TYPE = "national"
-
-VERIFICATION_STATUS = "source_authoritative"
-
-INGESTED_DATE = datetime.now().strftime(
-    "%Y-%m-%d"
+OUTPUT_LAYER = (
+    str(OUTPUT_GPKG)
+    + "\\"
+    + OUTPUT_LAYER_NAME
 )
 
 
 # ============================================================
-# CANONICAL FIELD DEFINITIONS
+# CANONICAL SCHEMA
 # ============================================================
 
 CANONICAL_FIELDS = [
-    (
-        "cl_fire_id",
-        "TEXT",
-        100
-    ),
-    (
-        "fire_name",
-        "TEXT",
-        150
-    ),
-    (
-        "fire_year",
-        "LONG",
-        None
-    ),
-    (
-        "ignition_date",
-        "DATE",
-        None
-    ),
-    (
-        "incident_type",
-        "TEXT",
-        50
-    ),
-    (
-        "source_id",
-        "TEXT",
-        50
-    ),
-    (
-        "source_record_id",
-        "TEXT",
-        150
-    ),
-    (
-        "source_name",
-        "TEXT",
-        150
-    ),
-    (
-        "source_type",
-        "TEXT",
-        50
-    ),
-    (
-        "source_date",
-        "DATE",
-        None
-    ),
-    (
-        "ingested_date",
-        "DATE",
-        None
-    ),
-    (
-        "verification_status",
-        "TEXT",
-        50
-    ),
-    (
-        "supersedes_id",
-        "TEXT",
-        100
-    ),
-    (
-        "is_current",
-        "SHORT",
-        None
-    ),
-    (
-        "notes",
-        "TEXT",
-        500
-    ),
+
+    ("cl_fire_id", "TEXT", 150),
+
+    ("fire_name", "TEXT", 150),
+
+    ("fire_year", "LONG", None),
+
+    ("ignition_date", "DATE", None),
+
+    ("incident_type", "TEXT", 50),
+
+    ("source_id", "TEXT", 50),
+
+    ("source_record_id", "TEXT", 150),
+
+    ("source_name", "TEXT", 150),
+
+    ("source_type", "TEXT", 50),
+
+    ("source_date", "DATE", None),
+
+    ("ingested_date", "DATE", None),
+
+    ("verification_status", "TEXT", 50),
+
+    ("supersedes_id", "TEXT", 150),
+
+    ("is_current", "SHORT", None),
+
+    ("notes", "TEXT", 500),
 ]
 
 
@@ -179,16 +136,26 @@ def parse_iso_date(value):
     if not value:
         return None
 
-    try:
+    if isinstance(value, datetime):
+        return value
 
-        return datetime.strptime(
-            value,
-            "%Y-%m-%d"
-        )
+    for date_format in [
+        "%Y-%m-%d",
+        "%m/%d/%Y",
+        "%Y/%m/%d",
+    ]:
 
-    except ValueError:
+        try:
 
-        return None
+            return datetime.strptime(
+                str(value),
+                date_format
+            )
+
+        except ValueError:
+            continue
+
+    return None
 
 
 def build_cl_fire_id(
@@ -209,8 +176,86 @@ def build_cl_fire_id(
     )
 
 
+def read_local_mapping():
+
+    mapping = {}
+
+    if not LOCAL_MAPPING_FILE.exists():
+        return mapping
+
+    with LOCAL_MAPPING_FILE.open(
+        "r",
+        encoding="utf-8-sig",
+        newline=""
+    ) as f:
+
+        reader = csv.DictReader(f)
+
+        for row in reader:
+
+            canonical_field = (
+                row["canonical_field"].strip()
+            )
+
+            local_field = (
+                row["local_field"].strip()
+            )
+
+            if local_field:
+
+                mapping[
+                    canonical_field
+                ] = local_field
+
+    return mapping
+
+
+def find_local_dataset():
+    """
+    Return the first supported local dataset found.
+
+    Supported prototype formats:
+    - Shapefile
+    - GeoJSON
+    - GeoPackage
+
+    We deliberately do not guess among multiple datasets.
+    """
+
+    supported_files = []
+
+    for path in LOCAL_DIR.iterdir():
+
+        if path.name.startswith("."):
+            continue
+
+        if path.suffix.lower() in {
+            ".shp",
+            ".geojson",
+            ".gpkg",
+        }:
+
+            supported_files.append(
+                path
+            )
+
+    if len(supported_files) == 0:
+
+        return None
+
+    if len(supported_files) > 1:
+
+        raise ValueError(
+            "More than one local fire perimeter dataset was found.\n"
+            "Keep only one prototype local perimeter source in:\n"
+            f"{LOCAL_DIR}"
+        )
+
+    return supported_files[0]
+
+
 # ============================================================
-# CHECK SOURCE
+# START
 # ============================================================
 
 print()
@@ -222,58 +267,25 @@ print(
 )
 print()
 
-print(
-    "Source:"
-)
-
-print(
-    MTBS_INPUT
-)
-
-print()
-
 
 if not MTBS_INPUT.exists():
 
     raise FileNotFoundError(
-        f"MTBS source not found:\n"
-        f"{MTBS_INPUT}"
+        f"MTBS source not found:\n{MTBS_INPUT}"
     )
 
 
 # ============================================================
-# REMOVE OLD OUTPUT
+# TEMPORARY CANONICAL FEATURE CLASS
 # ============================================================
 
-if OUTPUT_GPKG.exists():
-
-    OUTPUT_GPKG.unlink()
-
-
-# ============================================================
-# CREATE EMPTY CANONICAL FEATURE CLASS
-# ============================================================
-
-print(
-    "Creating canonical fire perimeter dataset..."
-)
-
-
-source_description = arcpy.Describe(
-    str(MTBS_INPUT)
-)
-
-source_sr = source_description.spatialReference
-
-
-temp_gdb = (
+TEMP_GDB = (
     PROCESSED_DIR
     / "standardize_temp.gdb"
 )
 
-
 if not arcpy.Exists(
-    str(temp_gdb)
+    str(TEMP_GDB)
 ):
 
     arcpy.management.CreateFileGDB(
@@ -283,10 +295,9 @@ if not arcpy.Exists(
 
 
 canonical_fc = str(
-    temp_gdb
+    TEMP_GDB
     / "fire_perimeters_current"
 )
-
 
 if arcpy.Exists(
     canonical_fc
@@ -297,8 +308,15 @@ if arcpy.Exists(
     )
 
 
+source_sr = (
+    arcpy.Describe(
+        str(MTBS_INPUT)
+    ).spatialReference
+)
+
+
 arcpy.management.CreateFeatureclass(
-    str(temp_gdb),
+    str(TEMP_GDB),
     "fire_perimeters_current",
     "POLYGON",
     spatial_reference=source_sr
@@ -329,8 +347,34 @@ for (
         )
 
 
+target_fields = [
+
+    "cl_fire_id",
+    "fire_name",
+    "fire_year",
+    "ignition_date",
+    "incident_type",
+
+    "source_id",
+    "source_record_id",
+    "source_name",
+    "source_type",
+
+    "source_date",
+    "ingested_date",
+
+    "verification_status",
+    "supersedes_id",
+    "is_current",
+
+    "notes",
+
+    "SHAPE@",
+]
+
+
 # ============================================================
-# MTBS SOURCE ADAPTER
+# ADAPTER 1 — MTBS
 # ============================================================
 
 print(
@@ -338,7 +382,8 @@ print(
 )
 
 
-source_fields = [
+mtbs_source_fields = [
+
     "event_id",
     "incid_name",
     "incid_type",
@@ -350,38 +395,18 @@ source_fields = [
 ]
 
 
-target_fields = [
-    "cl_fire_id",
-    "fire_name",
-    "fire_year",
-    "ignition_date",
-    "incident_type",
-    "source_id",
-    "source_record_id",
-    "source_name",
-    "source_type",
-    "source_date",
-    "ingested_date",
-    "verification_status",
-    "supersedes_id",
-    "is_current",
-    "notes",
-    "SHAPE@",
-]
+mtbs_count = 0
 
 
-record_count = 0
+with arcpy.da.InsertCursor(
+    canonical_fc,
+    target_fields
+) as insert_cursor:
 
-
-with arcpy.da.SearchCursor(
-    str(MTBS_INPUT),
-    source_fields
-) as search_cursor:
-
-    with arcpy.da.InsertCursor(
-        canonical_fc,
-        target_fields
-    ) as insert_cursor:
+    with arcpy.da.SearchCursor(
+        str(MTBS_INPUT),
+        mtbs_source_fields
+    ) as search_cursor:
 
         for row in search_cursor:
 
@@ -410,82 +435,514 @@ with arcpy.da.SearchCursor(
 
 
             cl_fire_id = build_cl_fire_id(
-                SOURCE_ID,
+                "mtbs",
                 event_id
             )
 
 
             notes = (
+
                 f"Original MTBS burnbndac="
                 f"{burn_boundary_acres}; "
-                f"map_prog={map_program}; "
-                f"asmnt_type={assessment_type}"
+
+                f"map_prog="
+                f"{map_program}; "
+
+                f"asmnt_type="
+                f"{assessment_type}"
             )
 
 
             insert_cursor.insertRow(
                 (
+
                     cl_fire_id,
+
                     incident_name,
+
                     fire_year,
+
                     ignition_date,
+
                     incident_type,
-                    SOURCE_ID,
+
+                    "mtbs",
+
                     event_id,
-                    SOURCE_NAME,
-                    SOURCE_TYPE,
+
+                    "MTBS Burned Area Boundaries",
+
+                    "national",
+
                     None,
+
                     datetime.now(),
-                    VERIFICATION_STATUS,
+
+                    "source_authoritative",
+
                     None,
+
                     1,
+
                     notes,
+
                     geometry,
                 )
             )
 
 
-            record_count += 1
+            mtbs_count += 1
 
-
-# ============================================================
-# EXPORT TO GEOPACKAGE
-# ============================================================
 
 print(
-    f"Standardized records: "
-    f"{record_count:,}"
+    f"MTBS records standardized: "
+    f"{mtbs_count:,}"
 )
 
 print()
+
+
+# ============================================================
+# ADAPTER 2 — OPTIONAL LOCAL DATA
+# ============================================================
+
+local_dataset = find_local_dataset()
+
+
+if local_dataset is None:
+
+    print(
+        "No local fire perimeter dataset found."
+    )
+
+    print(
+        "Continuing with national sources only."
+    )
+
+    print()
+
+    local_count = 0
+
+
+else:
+
+    print(
+        "Local fire perimeter dataset found:"
+    )
+
+    print(
+        local_dataset
+    )
+
+    print()
+
+
+    local_mapping = read_local_mapping()
+
+
+    required_mappings = {
+        "fire_year",
+        "incident_type",
+    }
+
+
+    missing_mapping = (
+        required_mappings
+        - set(
+            local_mapping.keys()
+        )
+    )
+
+
+    if missing_mapping:
+
+        raise ValueError(
+
+            "Local dataset found, but required local-field "
+            "mappings are missing:\n"
+
+            + ", ".join(
+                sorted(
+                    missing_mapping
+                )
+            )
+
+            + "\n\nUpdate:\n"
+
+            + str(
+                LOCAL_MAPPING_FILE
+            )
+        )
+
+
+    # --------------------------------------------------------
+    # CONVERT GEOJSON IF NECESSARY
+    # --------------------------------------------------------
+
+    local_source = str(
+        local_dataset
+    )
+
+
+    if (
+        local_dataset.suffix.lower()
+        == ".geojson"
+    ):
+
+        local_temp_fc = str(
+            TEMP_GDB
+            / "local_fire_source"
+        )
+
+        if arcpy.Exists(
+            local_temp_fc
+        ):
+
+            arcpy.management.Delete(
+                local_temp_fc
+            )
+
+        arcpy.conversion.JSONToFeatures(
+            str(local_dataset),
+            local_temp_fc
+        )
+
+        local_source = (
+            local_temp_fc
+        )
+
+
+    # --------------------------------------------------------
+    # REPROJECT LOCAL DATA INTO CANONICAL CRS IF NECESSARY
+    # --------------------------------------------------------
+
+    local_sr = (
+        arcpy.Describe(
+            local_source
+        ).spatialReference
+    )
+
+
+    if (
+        local_sr.factoryCode
+        != source_sr.factoryCode
+    ):
+
+        projected_local = str(
+            TEMP_GDB
+            / "local_fire_projected"
+        )
+
+        if arcpy.Exists(
+            projected_local
+        ):
+
+            arcpy.management.Delete(
+                projected_local
+            )
+
+        arcpy.management.Project(
+            local_source,
+            projected_local,
+            source_sr
+        )
+
+        local_source = (
+            projected_local
+        )
+
+
+    # --------------------------------------------------------
+    # CHECK LOCAL FIELDS
+    # --------------------------------------------------------
+
+    available_local_fields = {
+
+        field.name
+
+        for field in arcpy.ListFields(
+            local_source
+        )
+    }
+
+
+    for (
+        canonical_field,
+        local_field
+    ) in local_mapping.items():
+
+        if (
+            local_field
+            not in available_local_fields
+        ):
+
+            raise ValueError(
+
+                f"Mapped local field '{local_field}' "
+                f"for canonical field '{canonical_field}' "
+                "was not found in the local dataset."
+            )
+
+
+    # --------------------------------------------------------
+    # BUILD SEARCH FIELD LIST
+    # --------------------------------------------------------
+
+    mapped_fields = {
+
+        canonical:
+            local
+
+        for (
+            canonical,
+            local
+        ) in local_mapping.items()
+    }
+
+
+    local_search_fields = list(
+        dict.fromkeys(
+            mapped_fields.values()
+        )
+    )
+
+    local_search_fields.append(
+        "SHAPE@"
+    )
+
+
+    local_count = 0
+
+
+    with arcpy.da.InsertCursor(
+        canonical_fc,
+        target_fields
+    ) as insert_cursor:
+
+        with arcpy.da.SearchCursor(
+            local_source,
+            local_search_fields
+        ) as search_cursor:
+
+            for row in search_cursor:
+
+                row_values = dict(
+                    zip(
+                        local_search_fields,
+                        row
+                    )
+                )
+
+
+                fire_name = (
+                    row_values.get(
+                        mapped_fields.get(
+                            "fire_name"
+                        )
+                    )
+                    if mapped_fields.get(
+                        "fire_name"
+                    )
+                    else None
+                )
+
+
+                raw_fire_year = (
+                    row_values.get(
+                        mapped_fields[
+                            "fire_year"
+                        ]
+                    )
+                )
+
+
+                try:
+
+                    fire_year = int(
+                        raw_fire_year
+                    )
+
+                except (
+                    TypeError,
+                    ValueError
+                ):
+
+                    fire_year = None
+
+
+                ignition_date = None
+
+                if mapped_fields.get(
+                    "ignition_date"
+                ):
+
+                    ignition_date = parse_iso_date(
+
+                        row_values.get(
+                            mapped_fields[
+                                "ignition_date"
+                            ]
+                        )
+                    )
+
+
+                incident_type = (
+                    row_values.get(
+                        mapped_fields[
+                            "incident_type"
+                        ]
+                    )
+                )
+
+
+                source_record_id = None
+
+                if mapped_fields.get(
+                    "source_record_id"
+                ):
+
+                    source_record_id = (
+                        row_values.get(
+                            mapped_fields[
+                                "source_record_id"
+                            ]
+                        )
+                    )
+
+
+                geometry = row_values[
+                    "SHAPE@"
+                ]
+
+
+                cl_fire_id = build_cl_fire_id(
+                    "local",
+                    source_record_id
+                )
+
+
+                insert_cursor.insertRow(
+                    (
+
+                        cl_fire_id,
+
+                        fire_name,
+
+                        fire_year,
+
+                        ignition_date,
+
+                        incident_type,
+
+                        "local",
+
+                        source_record_id,
+
+                        local_dataset.stem,
+
+                        "local",
+
+                        None,
+
+                        datetime.now(),
+
+                        "local_verified",
+
+                        None,
+
+                        1,
+
+                        (
+                            "Locally supplied fire perimeter; "
+                            f"original file={local_dataset.name}"
+                        ),
+
+                        geometry,
+                    )
+                )
+
+
+                local_count += 1
+
+
+    print(
+        f"Local records standardized: "
+        f"{local_count:,}"
+    )
+
+    print()
+
+
+# ============================================================
+# CREATE CANONICAL GEOPACKAGE
+# ============================================================
 
 print(
     "Writing canonical GeoPackage..."
 )
 
 
+if arcpy.Exists(
+    str(OUTPUT_GPKG)
+):
+
+    arcpy.management.Delete(
+        str(OUTPUT_GPKG)
+    )
+
+
+arcpy.management.CreateSQLiteDatabase(
+    str(OUTPUT_GPKG),
+    "GEOPACKAGE"
+)
+
+
 arcpy.conversion.ExportFeatures(
     canonical_fc,
-    str(OUTPUT_GPKG)
+    OUTPUT_LAYER
 )
 
 
 # ============================================================
-# VALIDATE OUTPUT
+# VALIDATE
 # ============================================================
+
+if not arcpy.Exists(
+    OUTPUT_LAYER
+):
+
+    raise RuntimeError(
+        "Canonical output layer was not created."
+    )
+
 
 output_count = int(
     arcpy.management.GetCount(
-        str(OUTPUT_GPKG)
+        OUTPUT_LAYER
     )[0]
 )
 
 
-if output_count != record_count:
+expected_count = (
+    mtbs_count
+    + local_count
+)
+
+
+if (
+    output_count
+    != expected_count
+):
 
     raise ValueError(
-        "Canonical output record count does not match source "
-        "standardization count."
+
+        "Canonical output validation failed.\n"
+
+        f"Expected records: "
+        f"{expected_count:,}\n"
+
+        f"Written records: "
+        f"{output_count:,}"
     )
 
 
@@ -505,29 +962,28 @@ print(
 )
 
 print(
-    OUTPUT_GPKG
+    OUTPUT_LAYER
 )
 
 print()
 
 print(
-    f"Records written: "
+    "Sources ingested:"
+)
+
+print(
+    f"  MTBS: "
+    f"{mtbs_count:,}"
+)
+
+print(
+    f"  Local: "
+    f"{local_count:,}"
+)
+
+print()
+
+print(
+    f"Total canonical records: "
     f"{output_count:,}"
-)
-
-print()
-
-print(
-    "Current source adapters:"
-)
-
-print(
-    "  MTBS"
-)
-
-print()
-
-print(
-    "Future local, WFIGS, or corrected perimeter sources "
-    "can be mapped into this same canonical schema."
 )

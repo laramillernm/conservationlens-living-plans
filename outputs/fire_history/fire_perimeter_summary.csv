@@ -1,0 +1,17 @@
+metric,value
+dataset,ConservationLens Canonical Fire Perimeters
+canonical_input,C:\Users\Lara\ConservationInsights\conservationlens-living-plans\data\processed\fire_history\fire_perimeters_current.gpkg\fire_perimeters_current
+watershed_acres,86486.33
+canonical_fire_records_intersecting_el_rito,4
+source_count,1
+first_fire_year_present,2005
+last_fire_year_present,2022
+historical_comparison_period,2005-2014
+recent_comparison_period,2015-2024
+all_years_unique_burned_acres,8444.37
+all_years_unique_percent_watershed,9.76
+all_years_repeat_burn_acres,13.74
+all_years_maximum_burn_count,2
+method_id,fire_perimeter_history_v1
+script_version,1.1
+architecture_note,Analysis uses canonical ConservationLens fields rather than source-specific fields.

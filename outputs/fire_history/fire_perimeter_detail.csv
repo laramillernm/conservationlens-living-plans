@@ -1,0 +1,5 @@
+cl_fire_id,fire_name,fire_year,ignition_date,incident_type,source_id,source_name,source_type,verification_status,acres_inside_el_rito,percent_of_watershed
+mtbs_NM3635610626420050917,PINE CANYON,2005,2005-09-17,Wildfire,mtbs,MTBS Burned Area Boundaries,national,source_authoritative,3206.53,3.71
+mtbs_NM3644910620720190713,FRANCISQUITO,2019,2019-07-13,Wildfire,mtbs,MTBS Burned Area Boundaries,national,source_authoritative,13.74,0.02
+mtbs_NM3650210626920190607,GURULE,2019,2019-06-07,Wildfire,mtbs,MTBS Burned Area Boundaries,national,source_authoritative,2278.52,2.63
+mtbs_NM3645010622520220610,MIDNIGHT,2022,2022-06-10,Wildfire,mtbs,MTBS Burned Area Boundaries,national,source_authoritative,2959.32,3.42
