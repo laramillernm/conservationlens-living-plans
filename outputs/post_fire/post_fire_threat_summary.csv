@@ -1,0 +1,2 @@
+unit_type,unit_id,unit_name,relationship,cell_count,total_raster_acres,raw_mean,raw_median,raw_p90,raw_max,zero_pct,lower_pct,moderate_pct,high_pct,highest_pct,high_highest_pct,high_highest_acres
+planning_area,1302010211,El Rito,planning,230060,51164.15765430245,0.029810236766934395,0.01658555492758751,0.08053536713123322,0.13908585906028748,0.0,27.320264278883773,41.76127966617404,27.607580631139705,3.3108754238024862,30.91845605494219,15819.167600226843

@@ -1,0 +1,6 @@
+class_value,class_name,lower_bound,upper_bound,rule
+0,Zero,0,0,value = 0
+1,Lower,0,0.0037175784818828106,0 < value <= statewide nonzero P50
+2,Moderate,0.0037175784818828106,0.03270126134157181,P50 < value <= statewide nonzero P75
+3,High,0.03270126134157181,0.11331386864185333,P75 < value <= statewide nonzero P90
+4,Highest,0.11331386864185333,1,value > statewide nonzero P90

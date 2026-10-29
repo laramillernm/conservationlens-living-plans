@@ -2,6 +2,17 @@ project:
   name: ConservationLens Living Plans
   version: "0.1"
 
+  purpose: >
+    ConservationLens is an open-source, configurable planning framework
+    that connects environmental threats to the places and values they
+    affect, then identifies where intervention could be most beneficial.
+
+  decision_chain:
+    - threat
+    - connection
+    - consequence
+    - intervention
+
 planning_area:
   name: El Rito Watershed
   type: huc10
@@ -22,10 +33,30 @@ planning_period:
   current_year: 2026
 
 questions:
-  - What is exposed?
-  - What work has been completed?
-  - What important need remains?
-  - What has changed since the planning baseline?
+  threat:
+    question: Where is the threat?
+    purpose: >
+      Identify current hazards, stressors, disturbance patterns,
+      and meaningful changes in those conditions.
+
+  connection:
+    question: How is the threat connected to places or values we care about?
+    purpose: >
+      Identify hydrologic, landscape, spatial, and treatment relationships
+      that connect a threat source to potential consequences.
+
+  consequence:
+    question: What could be affected, and how much would it matter?
+    purpose: >
+      Identify communities, watershed resources, infrastructure,
+      ecological values, and previous investments that could be affected.
+
+  intervention:
+    question: Where would intervention be most beneficial, and why?
+    purpose: >
+      Identify locations where management actions could reduce threat,
+      interrupt damaging connections, protect important values, reinforce
+      previous investments, or provide multiple benefits.
 
 analysis_areas:
 
@@ -51,12 +82,10 @@ analysis_areas:
       parent_unit: huc8
 
     purpose: >
-      Adds immediately upstream HUC12 watersheds outside the
-      planning HUC that drain directly into the planning area,
-      as well as the first downstream HUC12 that receives flow
-      from the planning area. This provides bounded hydrologic
-      context for evaluating post-fire runoff, erosion, sediment,
-      and debris-flow consequences.
+      Provides bounded hydrologic context around the planning area.
+      It includes immediately upstream HUC12 watersheds outside the
+      planning HUC that drain directly into it and the first downstream
+      HUC12 that receives flow from the planning area.
 
   fire_context:
     method: buffer
@@ -76,7 +105,53 @@ analysis_areas:
     purpose: >
       Defines the broader landscape where forest treatment could
       reduce wildfire effects, protect watershed values, reduce
-      post-fire consequences, or reinforce previous treatments.
+      post-fire consequences, reinforce previous treatments, or
+      provide multiple conservation benefits.
+
+modules:
+
+  threat:
+    purpose: >
+      Describe where important threats occur and how conditions
+      have changed.
+
+    prototype_indicators:
+      - wildfire_hazard
+      - fire_regime_change
+      - post_fire_erosion_threat
+
+  connection:
+    purpose: >
+      Describe the spatial relationships that determine whether
+      a threat can affect the planning area or important values.
+
+    prototype_indicators:
+      - hydrologic_context
+      - upstream_downstream_relationship
+      - treatment_connectivity
+
+  consequence:
+    purpose: >
+      Determine what values could be affected if the threat occurs.
+
+    prototype_indicators:
+      - watershed_assets
+      - community_exposure
+      - infrastructure_exposure
+      - ecological_values
+      - existing_investment_at_risk
+
+  intervention:
+    purpose: >
+      Identify where management actions are most likely to reduce
+      threat or consequence and explain why.
+
+    prototype_indicators:
+      - treatment_gap
+      - forest_treatment_opportunity
+      - investment_protection
+      - multi_benefit_opportunity
+      - treatment_feasibility
 
 fire_regime:
 
@@ -89,3 +164,67 @@ fire_regime:
     end: 2024
 
   occurrence_context_buffer_km: 20
+
+post_fire:
+
+  threat_indicator:
+    indicator_id: post_fire_erosion_threat
+    decision_stage: threat
+
+    source_id: nmfap_postfire
+
+    source:
+      provider: New Mexico Forestry Division
+      dataset: New Mexico Forest Action Plan Post-Fire Erosion Threat
+      baseline_year: 2020
+      local_folder: data/raw/post_fire/nmfap/
+
+    analysis_area:
+      include:
+        - planning_area
+        - hydrologic_context
+
+    purpose: >
+      Identify locations where wildfire could generate elevated
+      post-fire erosion or debris-flow-related threat. This indicator
+      represents potential threat origin and does not independently
+      predict downstream runout or consequence.
+
+    interpretation:
+      separate_from:
+        - hydrologic_connection
+        - downstream_consequence
+        - treatment_priority
+
+product_principles:
+
+  national_baseline:
+    statement: >
+      National and statewide datasets provide the baseline,
+      not the ceiling.
+
+  local_data:
+    statement: >
+      Newer, locally authoritative, or corrected information can
+      supplement or supersede baseline datasets without changing
+      downstream analytical methods.
+
+  transparency:
+    statement: >
+      ConservationLens favors understandable metrics, explicit rules,
+      provenance, confidence, and caveats over opaque composite scores.
+
+  source_independence:
+    statement: >
+      Source-specific datasets are standardized into canonical
+      ConservationLens datasets before analysis.
+
+  configurable_questions:
+    statement: >
+      Analytical questions and priorities can vary by project while
+      using a repeatable underlying framework.
+
+  living_plan:
+    statement: >
+      Baseline conditions are preserved so new information can be
+      incorporated and changes can be evaluated over time.
