@@ -4,8 +4,18 @@ project:
 
 planning_area:
   name: El Rito Watershed
-  type: watershed
+  type: huc10
   source: data/boundaries/el_rito_boundary.geojson
+
+  huc:
+    unit: huc10
+    id: "1302010211"
+    name: El Rito
+
+    parent:
+      unit: huc8
+      id: "13020102"
+      name: Rio Chama
 
 planning_period:
   baseline_year: 2020
@@ -19,40 +29,57 @@ questions:
 
 analysis_areas:
 
+  watershed_analysis_area:
+    method: planning_huc
+    unit: huc10
+
+    purpose: >
+      Uses the configured planning HUC as the primary watershed
+      analysis geography.
+
+  hydrologic_context:
+    method: adjacent_huc12_network
+
+    include:
+      - immediate_upstream_huc12
+      - immediate_downstream_huc12
+
+    upstream_levels: 1
+    downstream_levels: 1
+
+    search_limit:
+      parent_unit: huc8
+
+    purpose: >
+      Adds immediately upstream HUC12 watersheds outside the
+      planning HUC that drain directly into the planning area,
+      as well as the first downstream HUC12 that receives flow
+      from the planning area. This provides bounded hydrologic
+      context for evaluating post-fire runoff, erosion, sediment,
+      and debris-flow consequences.
+
   fire_context:
     method: buffer
     distance_km: 20
+
     purpose: >
       Provides broader landscape context for fire occurrence,
       fire-size distribution, and fire-regime analysis.
 
-  post_fire_hydrologic_context:
-    method: upstream_contributing_area
-    derived_from: DEM
-    target_mode: planning_area
-
-    include:
-      - upstream_drainage_to_planning_area
-      - streams_entering_planning_area
-      - key_watershed_assets
-
-    purpose: >
-      Includes upstream areas capable of routing post-fire runoff,
-      sediment, erosion, or debris-flow impacts into the planning
-      area or identified watershed assets.
-
   treatment_context:
-    method: planning_plus_contributing_area
+    method: planning_plus_hydrologic_context
 
     include:
       - planning_area
-      - post_fire_hydrologic_context
+      - hydrologic_context
 
     purpose: >
-      Defines the landscape where forest treatment could reduce
-      wildfire effects or downstream watershed consequences.
+      Defines the broader landscape where forest treatment could
+      reduce wildfire effects, protect watershed values, reduce
+      post-fire consequences, or reinforce previous treatments.
 
 fire_regime:
+
   historical_period:
     start: 2005
     end: 2014

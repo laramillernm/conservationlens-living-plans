@@ -1,0 +1,13 @@
+metric,value
+planning_huc_unit,huc10
+planning_huc_id,1302010211
+planning_huc_name,El Rito
+parent_huc_unit,huc8
+parent_huc_id,13020102
+parent_huc_name,Rio Chama
+planning_huc12_count,3
+upstream_levels_requested,1
+downstream_levels_requested,1
+upstream_context_count,0
+downstream_context_count,1
+combined_context_count,1

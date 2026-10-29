@@ -1,0 +1,2 @@
+planning_huc_unit,planning_huc_id,planning_huc_name,parent_huc_unit,parent_huc_id,parent_huc_name,relationship,level,huc12,huc12_name,tohuc,related_huc12,related_huc12_name
+huc10,1302010211,El Rito,huc8,13020102,Rio Chama,immediate_downstream,1,130201021205,Mesa de Abiquiu-Rio Chama,130201021601,130201021103,Outlet El Rito
